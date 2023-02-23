@@ -25,7 +25,7 @@ catch {
 }
 
 if($contentDirectory -eq $null) { 
-    Write-Host "`nEnter the path to the directory containing your audio files:"
+    Write-Host "`nEnter the path to the directory containing your audio files (do not use quotes):"
     $contentDirectory = Read-Host
 }
 try {
@@ -40,7 +40,7 @@ catch {
 }
 
 if($imagePath -eq $null) {
-    Write-Host "`nEnter the path to the image you want to use for the video background:"
+    Write-Host "`nEnter the path to the image you want to use for the video background (do not use quotes):"
     $imagePath = Read-Host
 }
 try {
@@ -75,13 +75,9 @@ if(Test-Path -Path $contentDirectory\* -Include "*.vtt") {
 
 # Start processing each audio file
 Get-ChildItem -Path $contentDirectory\* -Include "*.wav","*.mp3"."*.flac","*.m4a","*.ogg","*.oga","*.wma" | ForEach-Object {
-    # $audiofile = $_.Name
-    # Write-Host $audiofile
     $outputName = $_.Name + ".mkv"
     Write-Host "Creating $contentDirectory\merged\$outputName..."
-    # .\$ffmpegPath -loop 1 -framerate 1 -i $imagePath -i $audiofile -i $audiofile.$subFileFormat -shortest -acodec copy -scodec copy -disposition:s:0 default output.mkv
     & $ffmpegPath -loglevel quiet -loop 1 -framerate 1 -i $imagePath -i $_.FullName -i $_$subFileFormat -shortest -acodec copy -scodec copy -disposition:s:0 default $contentDirectory\merged\$outputName
-    # Write-Host $_$subFileFormat
 }
 
 
