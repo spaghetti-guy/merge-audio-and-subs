@@ -77,7 +77,7 @@ if(Test-Path -Path $contentDirectory\* -Include "*.vtt") {
 Get-ChildItem -Path $contentDirectory\* -Include "*.wav","*.mp3"."*.flac","*.m4a","*.ogg","*.oga","*.wma" | ForEach-Object {
     $outputName = $_.Name + ".mkv"
     Write-Host "Creating $contentDirectory\merged\$outputName..."
-    & $ffmpegPath -loglevel quiet -loop 1 -framerate 1 -i $imagePath -i $_.FullName -i $_$subFileFormat -shortest -acodec copy -scodec copy -disposition:s:0 default $contentDirectory\merged\$outputName
+    & $ffmpegPath -loglevel quiet -loop 1 -framerate 1 -i $imagePath -i $_.FullName -i $_$subFileFormat -shortest -fflags +shortest -max_interleave_delta 200M -acodec copy -scodec copy -disposition:s:0 default $contentDirectory\merged\$outputName
 }
 
 
