@@ -6,15 +6,14 @@
 # E.g. .\merge-audio-and-subs.ps1 -ffmpegPath "C:\path\to\ffmpeg.exe" -contentDirectory "C:\path to\your content\" -imagePath "C:\path\to your\image.png"
 # If you put ffmpeg in the same directory as this script, it will assume you want to use that one.
 
-param($ffmpegPath, $contentDirectory, $imagePath)
+param($ffmpegPath, $contentDirectory, $imagePath, $fps)
 
 # Read input if required and try to correct paths
 if($ffmpegPath -eq $null) {
     if(Test-Path -Path ffmpeg.exe) {
         $ffmpegPath = Get-ChildItem -Path .\ -Filter "ffmpeg.exe"
     } else {
-        Write-Host "`nEnter the path to ffmpeg.exe (do not use quotes):"
-        $ffmpegPath = Read-Host
+        $ffmpegPath = Read-Host "`nEnter the path to ffmpeg.exe (do not use quotes)"
     }
 }
 try {$ffmpegPath = Get-ChildItem -Path $ffmpegPath -Filter "ffmpeg.exe" -ErrorAction Stop}
@@ -25,8 +24,7 @@ catch {
 }
 
 if($contentDirectory -eq $null) { 
-    Write-Host "`nEnter the path to the directory containing your audio files (do not use quotes):"
-    $contentDirectory = Read-Host
+    $contentDirectory = Read-Host "`nEnter the path to the directory containing your audio files (do not use quotes)"
 }
 try {
     if(!(Test-Path -Path $contentDirectory -PathType Container)) {
@@ -40,8 +38,7 @@ catch {
 }
 
 if($imagePath -eq $null) {
-    Write-Host "`nEnter the path to the image you want to use for the video background (do not use quotes):"
-    $imagePath = Read-Host
+    $imagePath = Read-Host "`nEnter the path to the image you want to use for the video background (do not use quotes)"
 }
 try {
     if(!(Test-Path -Path $imagePath -Include "*.jpg","*.jpeg","*.gif","*.png","*.bmp","*.tif","*.tiff")) {
@@ -53,6 +50,13 @@ catch {
     Write-Host $_ -ForegroundColor Red
     Return
 }
+
+if($fps -eq $null) {
+    Write-Host "`nEnter desired frames per second. A smaller number means faster encodes, but subtitles may be delayed in their presentation."
+    Write-Host "1 is absolute fastest encode. 6 is probably tolerable for most people. 12 for those sensitive to timing but expect longer encode times."
+    $fps = Read-Host "FPS"
+}
+
 
 
 # Determine format of subtitles
@@ -77,7 +81,7 @@ if(Test-Path -Path $contentDirectory\* -Include "*.vtt") {
 Get-ChildItem -Path $contentDirectory\* -Include "*.wav","*.mp3"."*.flac","*.m4a","*.ogg","*.oga","*.wma" | ForEach-Object {
     $outputName = $_.Name + ".mkv"
     Write-Host "Creating $contentDirectory\merged\$outputName..."
-    & $ffmpegPath -loglevel quiet -loop 1 -framerate 1 -i $imagePath -i $_.FullName -i $_$subFileFormat -shortest -fflags +shortest -max_interleave_delta 200M -vcodec libx264 -preset ultrafast -crf 0 -acodec copy -scodec copy -disposition:s:0 default $contentDirectory\merged\$outputName
+    & $ffmpegPath -loglevel quiet -loop 1 -framerate $fps -i $imagePath -i $_.FullName -i $_$subFileFormat -shortest -fflags +shortest -max_interleave_delta 200M -vcodec libx264 -preset ultrafast -crf 0 -acodec copy -scodec copy -disposition:s:0 default $contentDirectory\merged\$outputName
 }
 
 
