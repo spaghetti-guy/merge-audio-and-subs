@@ -1,4 +1,4 @@
-# Last modified: 02/22/23 02:48PM
+# Last modified: 08/28/23 11:39PM
 # Source and readme: https://github.com/spaghetti-guy/merge-audio-and-subs
 #
 # You can pass the variables directly to the script or you can run it interactively. 
@@ -6,25 +6,44 @@
 # E.g. .\merge-audio-and-subs.ps1 -ffmpegPath "C:\path\to\ffmpeg.exe" -contentDirectory "C:\path to\your content\" -imagePath "C:\path\to your\image.png"
 # If you put ffmpeg in the same directory as this script, it will assume you want to use that one.
 
+
+
 param($ffmpegPath, $contentDirectory, $imagePath, $fps)
+
+Add-Type -AssemblyName System.Windows.Forms
 
 # Read input if required and try to correct paths
 if($ffmpegPath -eq $null) {
     if(Test-Path -Path ffmpeg.exe) {
         $ffmpegPath = Get-ChildItem -Path .\ -Filter "ffmpeg.exe"
     } else {
-        $ffmpegPath = Read-Host "`nEnter the path to ffmpeg.exe (do not use quotes)"
+        Write-Host "ffmpeg.exe not found in the current directory and not passed in via parameter, select ffmpeg.exe" -ForegroundColor Yellow
+
+        $fileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{ InitialDirectory = $pwd; Title = "Select ffmpeg.exe"; Filter = "ffmpeg|ffmpeg.exe"}
+        $null = $fileBrowser.ShowDialog()
+        $ffmpegPath = $fileBrowser.FileName
     }
 }
-try {$ffmpegPath = Get-ChildItem -Path $ffmpegPath -Filter "ffmpeg.exe" -ErrorAction Stop}
+try {
+    $ffmpegPath = Get-ChildItem -Path $ffmpegPath -Filter "ffmpeg.exe" -ErrorAction Stop
+    if(!($ffmpegPath -match "\\ffmpeg.exe")){
+        throw
+    }
+}
 catch {
     Write-Host "Error: Path to ffmpeg is invalid" -ForegroundColor Red
     Write-Host $_ -ForegroundColor Red
     Return
 }
 
-if($contentDirectory -eq $null) { 
-    $contentDirectory = Read-Host "`nEnter the path to the directory containing your audio files (do not use quotes)"
+Write-Host "Using ffmpeg.exe at `"$ffmpegpath`"" -ForegroundColor Green
+
+if($contentDirectory -eq $null) {
+    Write-Host "Content directory not passed in via parameter, select the folder containing your audio and subs" -ForegroundColor Yellow
+
+    $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog -Property @{ InitialDirectory = $pwd; Description = "Select the folder containing your audio and subs"; UseDescriptionForTitle = $true}
+    $null = $folderBrowser.ShowDialog()
+    $contentDirectory = $folderBrowser.SelectedPath
 }
 try {
     if(!(Test-Path -Path $contentDirectory -PathType Container)) {
@@ -37,11 +56,17 @@ catch {
     Return
 }
 
+Write-Host "Using the content directory at `"$contentDirectory`"" -ForegroundColor Green
+
 if($imagePath -eq $null) {
-    $imagePath = Read-Host "`nEnter the path to the image you want to use for the video background (do not use quotes)"
+    Write-Host "Image path not passed in via parameter, select the image you'd like to use for the video" -ForegroundColor Yellow
+
+    $fileBrowser = New-Object System.Windows.Forms.OpenFileDialog -Property @{ InitialDirectory = $pwd; Title = "Select your image"; Filter = "Image (*.png;*.jpg;*.jpeg)|*.png;*.jpg;*.jpeg"}
+    $null = $fileBrowser.ShowDialog()
+    $imagePath = $fileBrowser.FileName
 }
 try {
-    if(!(Test-Path -Path $imagePath -Include "*.jpg","*.jpeg","*.gif","*.png","*.bmp","*.tif","*.tiff")) {
+    if(!(Test-Path -Path $imagePath -Include "*.jpg","*.jpeg","*.gif","*.png")) {
         throw
     }
 }
@@ -51,12 +76,13 @@ catch {
     Return
 }
 
+Write-Host "Using the image at `"$imagePath`"" -ForegroundColor Green
+
 if($fps -eq $null) {
     Write-Host "`nEnter desired frames per second. A smaller number means faster encodes, but subtitles may be delayed in their presentation."
     Write-Host "1 is absolute fastest encode. 6 is probably tolerable for most people. 12 for those sensitive to timing but expect longer encode times."
     $fps = Read-Host "FPS"
 }
-
 
 
 # Determine format of subtitles
