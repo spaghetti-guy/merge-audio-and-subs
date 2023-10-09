@@ -24,18 +24,14 @@ Note: you can also pass all variables into the script directly rather than runni
 <br>
 
 ## 1-line FFmpeg command for single file conversions. 
-If you don't want to download this script, you can just run this command in CMD or PowerShell. If you set your working directory to the directory with your inputs, you do not need the full path to them (just their name is fine).
+If you don't want to download this script, you can just run this command in CMD or PowerShell to convert a single file. If you set your working directory to the directory with your inputs, you do not need the full path to them (just their name is fine).
 ```
-.\PathToffmpeg.exe -loglevel quiet -loop 1 -framerate 6 -i PathToYourImage.png -i PathToYourAudio.wav -i PathToYourSubs.vtt -shortest -acodec copy -scodec copy -disposition:s:0 default SomeOutputName.mkv
+.\PathToffmpeg.exe -loglevel quiet -loop 1 -framerate 6 -i PathToYourImage.png -i PathToYourAudio.wav -i PathToYourSubs.vtt -to AudioDurationInSeconds -vcodec libx264 -preset ultrafast -crf 0 -tune stillimage -acodec copy -scodec copy -disposition:s:0 default SomeOutputFileName.mkv
 ```
 
 <br>
 
 # Troubleshooting
-If you receive an error saying something to the effect of "[the script] cannot be loaded because running scripts is disabled on this system", do the following
-1. Run PowerShell as administrator (this is just temporary, do not run the merge script as an admin)
-2. Type "`Set-ExecutionPolicy Bypass`"
-3. Type "`y`" to confirm
-4. Close PowerShell and open it again without running it as admin. 
+If you receive an error saying something to the effect of "[the script] cannot be loaded because running scripts is disabled on this system" or "[the script] is not digitally signed", right-click the downloaded script and click "Unblock".
 
 To speed up encoding, use an image with a smaller file size. For example the "solidblack.png" in this repo.
