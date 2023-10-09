@@ -1,4 +1,3 @@
-# Last modified: 08/28/23 11:39PM
 # Source and readme: https://github.com/spaghetti-guy/merge-audio-and-subs
 #
 # You can pass the variables directly to the script or you can run it interactively. 
@@ -102,12 +101,20 @@ if(Test-Path -Path $contentDirectory\* -Include "*.vtt") {
 # Silently create an output folder for the videos
 [Void](mkdir $contentDirectory\merged)
 
+# Create shell for duration checking
+$shell = New-Object -ComObject Shell.Application
+$folder = $shell.Namespace($contentDirectory)
 
 # Start processing each audio file
 Get-ChildItem -Path $contentDirectory\* -Include "*.wav","*.mp3"."*.flac","*.m4a","*.ogg","*.oga","*.wma" | ForEach-Object {
     $outputName = $_.Name + ".mkv"
+
+    # Get the duration of the audio file
+    $file = $folder.ParseName($_.Name)
+    $duration = $folder.GetDetailsOf($file, 27)
+
     Write-Host "Creating $contentDirectory\merged\$outputName..."
-    & $ffmpegPath -loglevel quiet -loop 1 -framerate $fps -i $imagePath -i $_.FullName -i $_$subFileFormat -shortest -fflags +shortest -max_interleave_delta 200M -vcodec libx264 -preset ultrafast -crf 0 -acodec copy -scodec copy -disposition:s:0 default $contentDirectory\merged\$outputName
+    & $ffmpegPath -loglevel quiet -loop 1 -framerate $fps -i $imagePath -i $_.FullName -i $_$subFileFormat -to $duration -vcodec libx264 -preset ultrafast -crf 0 -tune stillimage -acodec copy -scodec copy -disposition:s:0 default $contentDirectory\merged\$outputName
 }
 
 
