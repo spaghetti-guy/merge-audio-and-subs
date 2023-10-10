@@ -6,7 +6,8 @@ The initial goal of this was to combine .vtt subs with .wav audio, but the scrip
 <br>
 
 ## Requirements
-* You need ffmpeg.exe somewhere accessible. It shouldn't matter which build you use. For reference, I use the codex full release build at: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z
+* If you want to run the program interactively (i.e. if you do not pass all arguments in at the commandline), you will need [Powershell 7](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows).
+* You need ffmpeg.exe somewhere accessible. It shouldn't matter which build you use. For reference, I use the codex full release build [located here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z).
 * The script assumes your subtitles have the exact same name as your audio. E.g. `audio1.wav` and `audio1.wav.vtt`. Adujust accordingly.
 * You can use any image for the input, though make sure it's a decent resolution so the subtitles are legible. I recommend 480p or higher. An image with a smaller file size will result in significantly faster encoding. There's a 1280x720 solid black image in this repo if you don't care about visuals and just want to encode as fast as possible.
 
