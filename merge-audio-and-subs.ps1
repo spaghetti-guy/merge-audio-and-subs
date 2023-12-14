@@ -106,7 +106,7 @@ $shell = New-Object -ComObject Shell.Application
 $folder = $shell.Namespace($contentDirectory)
 
 # Start processing each audio file
-Get-ChildItem -Path $contentDirectory\* -Include "*.wav","*.mp3"."*.flac","*.m4a","*.ogg","*.oga","*.wma" | ForEach-Object {
+Get-ChildItem -Path $contentDirectory\* -Include "*.wav","*.mp3","*.flac","*.m4a","*.ogg","*.oga","*.wma" | ForEach-Object {
     $outputName = $_.Name + ".mkv"
 
     # Get the duration of the audio file
